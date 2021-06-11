@@ -5,14 +5,15 @@ function bonusItems:givePlayeritem(player)
     local roomType = Game():GetRoom():GetType()
     player = Isaac.GetPlayer(0);
 
-    if roomType == RoomType.ROOM_DEFAULT then
-        roomPool = ItemPoolType.POOL_GOLDEN_CHEST
-    else
-        roomPool = Game():GetItemPool():GetPoolForRoom(roomType, seed)
-    end
-    if roomPool == ItemPoolType.POOL_NULL then
-        roomPool = ItemPoolType.POOL_TREASURE 
-    end
+    -- if roomType == RoomType.ROOM_DEFAULT then
+    --     roomPool = ItemPoolType.POOL_GOLDEN_CHEST
+    -- else
+    --     roomPool = Game():GetItemPool():GetPoolForRoom(roomType, seed)
+    -- end
+    -- if roomPool == ItemPoolType.POOL_NULL then
+    --     roomPool = ItemPoolType.POOL_TREASURE 
+    -- end
+    roomPool = ItemPoolType.POOL_TREASURE
     findCollectible = Game():GetItemPool():GetCollectible(roomPool, false, seed, CollectibleType.COLLECTIBLE_NULL)
     
     -- for stage in level do
