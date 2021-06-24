@@ -32,18 +32,18 @@ local illegalItems = {
 	[626]=true, -- Knife Piece 1
 	[627]=true, -- Knife Piece 2
 	[633]=true, -- Dogma
-	[668]=true  -- Dad's Note
+	[668]=true,  -- Dad's Note
     -- undesirable/run ruining items
-    []=true, -- Bob's brain
-    []=true, -- Wiz
+    [273]=true, -- Bob's brain
+    [358]=true, -- Wiz
     -- potentially major run altering items
-    []=true, -- Dead Cat
-    []=true, -- TMTRAINER
-    []=true, -- Ipecac
-    []=true, -- Soy Milk
-    []=true, -- Missing No
-    []=true, -- Polyphemus
-    []=true, -- Libra
+    [81]=true, -- Dead Cat
+    [721]=true, -- TMTRAINER
+    [149]=true, -- Ipecac
+    [330]=true, -- Soy Milk
+    [258]=true, -- Missing No
+    [169]=true, -- Polyphemus
+    [304]=true -- Libra
 }
 
 for i in string.gmatch(itemsBlacklistString, "%S+") do
