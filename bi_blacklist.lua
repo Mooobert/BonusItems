@@ -21,18 +21,6 @@ local bi_items_blacklist = {} -- module
 local generateBlacklist = {}
 
 local illegalItems = {
-    -- story related items
-	[238]=true, -- Key Piece 1
-	[239]=true, -- Key Piece 2
-	[327]=true, -- The Negative
-	[328]=true, -- The Polaroid
-	[550]=true, -- Broken Shovel 1
-	[551]=true, -- Broken Shovel 2
-	[552]=true, -- Mom's Shovel
-	[626]=true, -- Knife Piece 1
-	[627]=true, -- Knife Piece 2
-	[633]=true, -- Dogma
-	[668]=true,  -- Dad's Note
     -- undesirable/run ruining items
     [273]=true, -- Bob's brain
     [358]=true, -- Wiz
@@ -44,6 +32,14 @@ local illegalItems = {
     [258]=true, -- Missing No
     [169]=true, -- Polyphemus
     [304]=true -- Libra
+	-- game crashing items
+	[424]=true, -- Sack Head
+	[194]=true, -- Magic 8 Ball
+	[263]=true, -- Clear Rune
+	[196]=true, -- Squeezy
+	[344]=true, -- Match Book
+	[354]=true, -- Crack Jacks
+	[580]=true -- Red Key
 }
 
 for i in string.gmatch(itemsBlacklistString, "%S+") do
