@@ -31,15 +31,7 @@ local illegalItems = {
     [330]=true, -- Soy Milk
     [258]=true, -- Missing No
     [169]=true, -- Polyphemus
-    [304]=true -- Libra
-	-- game crashing items
-	[424]=true, -- Sack Head
-	[194]=true, -- Magic 8 Ball
-	[263]=true, -- Clear Rune
-	[196]=true, -- Squeezy
-	[344]=true, -- Match Book
-	[354]=true, -- Crack Jacks
-	[580]=true -- Red Key
+    [304]=true, -- Libra
 }
 
 for i in string.gmatch(itemsBlacklistString, "%S+") do
