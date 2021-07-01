@@ -68,6 +68,5 @@ function bonusItems:itemsPlease(player)
     -- TODO: make it so that you can't get active items, just to avoid potentially losing an already good active item
 end
 
-bonusItems:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, bonusItems.itemsPlease)
--- TODO: find a way to receive item(s) each floor rather than the first time you generate your character
+bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.itemsPlease, EntityType.ENTITY_PLAYER)
 
