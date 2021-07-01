@@ -24,6 +24,8 @@ local illegalItems = {
     -- undesirable/run ruining items
     [273]=true, -- Bob's brain
     [358]=true, -- Wiz
+    [209]=true, -- Butt Bombs
+    [371]=true, -- Curse of the Tower
     -- potentially major run altering items
     [81]=true, -- Dead Cat
     [721]=true, -- TMTRAINER
@@ -32,6 +34,7 @@ local illegalItems = {
     [258]=true, -- Missing No
     [169]=true, -- Polyphemus
     [304]=true, -- Libra
+    [402]=true, -- Chaos
 }
 
 for i in string.gmatch(itemsBlacklistString, "%S+") do
