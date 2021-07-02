@@ -30,30 +30,37 @@ function bonusItems:giveNewItem(player)
         end
     end
 
-    -- if playerData["pickupIncoming"] == true then
-    --     if queuedItem == nil then
-    --         local level = Game():GetLevel():GetStage()
-    --         local roomType = Game():GetRoom():GetType()
-    --         local itemConfig = Isaac.GetItemConfig()
-    --         bonusItems:choosePool(player)
-    --     end
-    -- end
-
-    bonusItems:choosePool(player)
-    findCollectible = Game():GetItemPool():GetCollectible(roomPool, false, seed, CollectibleType.COLLECTIBLE_NULL)
+    if playerData["pickupIncoming"] == true then
+        if queuedItem == nil then
+            local level = Game():GetLevel():GetStage()
+            local roomType = Game():GetRoom():GetType()
+            local itemConfig = Isaac.GetItemConfig()
+            bonusItems:choosePool(player)
+            findCollectible = Game():GetItemPool():GetCollectible(roomPool, false, seed, CollectibleType.COLLECTIBLE_NULL)
+        end
+    end
+    -- bonusItems:choosePool(player)
     player:AddCollectible(findCollectible)
 end
 
--- function bonusItems:removeItem(player)
---     if findCollectible == ItemType.ITEM_ACTIVE then
---     if findCollectible == CollectibleType.COLLECTIBLE_REVELATION then
---         player:RemoveCollectible(findCollectible)
---         print(findCollectible .. " was removed!")
---     end
--- end
+function bonusItems:removeItem(player)
+    local stop = false
+    while stop == false do
+        -- findCollectible = Game():GetItemPool():GetCollectible(roomPool, false, seed, CollectibleType.COLLECTIBLE_NULL)
+        if bi_items_blacklist.canRollInto(findCollectible) == true then -- is this item blacklisted?
+            if collectibleType == ItemType.ITEM_PASSIVE or collectibleType == ItemType.ITEM_FAMILIAR then
+                Game():GetItemPool():RemoveCollectible(findCollectible)
+                stop = true
+            end
+        else
+            print("bad thing found, looping again!")
+        end
+    end
+end
 
 function bonusItems:itemsPlease(player)
-    player = Isaac.GetPlayer(1);
+    player = Isaac.GetPlayer(0);
+
     playerData = player:GetData()
     if playerCounter == 1 then
         playerData["pickupIncoming"] = true
@@ -69,4 +76,3 @@ function bonusItems:itemsPlease(player)
 end
 
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.itemsPlease, EntityType.ENTITY_PLAYER)
-
