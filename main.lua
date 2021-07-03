@@ -1,12 +1,9 @@
 local bonusItems = RegisterMod("Bonus Items!", 1)
 
-local bi_blacklist = include("bi_blacklist")
-
-local pickupIncoming = {}
-local playerCounter = 1
+local bi_items_blacklist = include("bi_items_blacklist")
 
 function bonusItems:choosePool(player)
-    local item_pools = {
+    local itemPools = {
         ItemPoolType.POOL_TREASURE, -- 0
         ItemPoolType.POOL_DEVIL, -- 3
         ItemPoolType.POOL_TREASURE, -- 0
@@ -15,64 +12,47 @@ function bonusItems:choosePool(player)
         ItemPoolType.POOL_SECRET, -- 5
         ItemPoolType.POOL_TREASURE, -- 0
         ItemPoolType.POOL_GOLDEN_CHEST, -- 8
-        ItemPoolType.POOL_TREASURE -- 0
     }
-    roomPool = item_pools[math.random(1,9)]
-    print(roomPool)
+    roomPool = itemPools[math.random(1,8)]
+    -- simplest random selection method I could think of that would yield somewhat balanced item pool draws
+    -- print(roomPool)
 end
 
 function bonusItems:giveNewItem(player)
-    local queuedItem = player.QueuedItem.Item
-    if queuedItem ~= nil and playerData["pickupIncoming"] ~= true then
-        local qID = queuedItem.ID
-        if not bi_items_blacklist.isIllegalItem(qID) then
-            playerData["pickupIncoming"] = true
-        end
-    end
+    bonusItems:choosePool(player)
+    findCollectible = Game():GetItemPool():GetCollectible(roomPool, false, seed, CollectibleType.COLLECTIBLE_NULL)
+    -- print(findCollectible)
+    local itemConfig = Isaac.GetItemConfig()
+    collectibleType = itemConfig:GetCollectible(findCollectible).Type
+    -- print(collectibleType)
+    -- items fall into 3 categories: collectibleType 1 is passive, 3 is active, and 4 is familiar
 
-    if playerData["pickupIncoming"] == true then
-        if queuedItem == nil then
-            local level = Game():GetLevel():GetStage()
-            local roomType = Game():GetRoom():GetType()
-            local itemConfig = Isaac.GetItemConfig()
-            bonusItems:choosePool(player)
-            findCollectible = Game():GetItemPool():GetCollectible(roomPool, false, seed, CollectibleType.COLLECTIBLE_NULL)
-        end
-    end
-    -- bonusItems:choosePool(player)
-    player:AddCollectible(findCollectible)
-end
-
-function bonusItems:removeItem(player)
-    local stop = false
-    while stop == false do
-        -- findCollectible = Game():GetItemPool():GetCollectible(roomPool, false, seed, CollectibleType.COLLECTIBLE_NULL)
-        if bi_items_blacklist.canRollInto(findCollectible) == true then -- is this item blacklisted?
-            if collectibleType == ItemType.ITEM_PASSIVE or collectibleType == ItemType.ITEM_FAMILIAR then
-                Game():GetItemPool():RemoveCollectible(findCollectible)
-                stop = true
-            end
-        else
-            print("bad thing found, looping again!")
-        end
+    if collectibleType == 3 then -- if the chosen item is active, we reroll until we get a non-active item
+        -- print("active item " .. findCollectible .. " was found, rerolling...")
+        bonusItems:giveNewItem(player)
+    else
+        -- print("passive item/familiar found!")
+        player:AddCollectible(findCollectible)
+        -- print(findCollectible .. " was given")
     end
 end
 
 function bonusItems:itemsPlease(player)
-    player = Isaac.GetPlayer(0);
-
-    playerData = player:GetData()
-    if playerCounter == 1 then
-        playerData["pickupIncoming"] = true
-    end
-
+    player = Isaac.GetPlayer(0)
     cap = math.random(1, 3)
     for num = 1,cap do
         bonusItems:giveNewItem(player)
-        print(findCollectible .. " was given")
     end
-    print("-----")
-    -- TODO: make it so that you can't get active items, just to avoid potentially losing an already good active item
+    -- print("-----")
 end
 
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.itemsPlease, EntityType.ENTITY_PLAYER)
+
+--[[
+    pro tip: don't generate items that generate pickups before the level loads or else the game will crash
+    note: lil delirium and red key may have game crashing properties, but I am completely oblivious as to why
+
+    note 2: Esau is imbued with magic and prevents game crashes because I guess he gets rendered after the floor loads.
+    Using the ModCallbacks.MC_POST_PLAYER_INIT enumeration will give both Jacob and Esau items, which I want the 
+    current callback to do, so that'll be WIP
+]]
