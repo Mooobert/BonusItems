@@ -1,7 +1,5 @@
 local bonusItems = RegisterMod("Bonus Items!", 1)
 
-local bi_items_blacklist = include("bi_items_blacklist")
-
 function bonusItems:choosePool(player)
     local itemPools = {
         ItemPoolType.POOL_TREASURE, -- 0
@@ -15,25 +13,20 @@ function bonusItems:choosePool(player)
     }
     roomPool = itemPools[math.random(1,8)]
     -- simplest random selection method I could think of that would yield somewhat balanced item pool draws
-    -- print(roomPool)
 end
 
 function bonusItems:giveNewItem(player)
     bonusItems:choosePool(player)
     findCollectible = Game():GetItemPool():GetCollectible(roomPool, false, seed, CollectibleType.COLLECTIBLE_NULL)
-    -- print(findCollectible)
     local itemConfig = Isaac.GetItemConfig()
     collectibleType = itemConfig:GetCollectible(findCollectible).Type
-    -- print(collectibleType)
     -- items fall into 3 categories: collectibleType 1 is passive, 3 is active, and 4 is familiar
 
     if collectibleType == 3 then -- if the chosen item is active, we reroll until we get a non-active item
         -- print("active item " .. findCollectible .. " was found, rerolling...")
         bonusItems:giveNewItem(player)
     else
-        -- print("passive item/familiar found!")
         player:AddCollectible(findCollectible)
-        -- print(findCollectible .. " was given")
     end
 end
 
@@ -43,7 +36,6 @@ function bonusItems:itemsPlease(player)
     for num = 1,cap do
         bonusItems:giveNewItem(player)
     end
-    -- print("-----")
 end
 
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.itemsPlease, EntityType.ENTITY_PLAYER)
