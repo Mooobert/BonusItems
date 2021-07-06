@@ -10,6 +10,4 @@ Lucky for you (if you choose to install this mod), this is the pick-me-up you've
 This mod gives you a couple item each floor to keep your run going, although it is currently possible to get something spicy and potentially skew/ruin your run.
 Use at your own discretion.
 
-Overall mod is fully functional, but the blacklist feature will be integrated soon™
-
-Further improvements are coming soon!
+Mod is fully functional!
