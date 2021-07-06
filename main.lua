@@ -23,7 +23,6 @@ function bonusItems:giveNewItem(player)
     -- items fall into 3 categories: collectibleType 1 is passive, 3 is active, and 4 is familiar
 
     if collectibleType == 3 then -- if the chosen item is active, we reroll until we get a non-active item
-        -- print("active item " .. findCollectible .. " was found, rerolling...")
         bonusItems:giveNewItem(player)
     else
         player:AddCollectible(findCollectible)
