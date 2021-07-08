@@ -1,10 +1,7 @@
 local bonusItems = RegisterMod("Bonus Items!", 1)
 
-<<<<<<< HEAD
-=======
 local bi_blacklist = include("bi_blacklist")
 
->>>>>>> wblacklist
 function bonusItems:choosePool(player)
     local itemPools = {
         ItemPoolType.POOL_TREASURE, -- 0
@@ -27,11 +24,6 @@ function bonusItems:giveNewItem(player)
     collectibleType = itemConfig:GetCollectible(findCollectible).Type
     -- items fall into 3 categories: collectibleType 1 is passive, 3 is active, and 4 is familiar
 
-<<<<<<< HEAD
-    if collectibleType == 3 then -- if the chosen item is active, we reroll until we get a non-active item
-        bonusItems:giveNewItem(player)
-    else
-=======
     if collectibleType == 3 then -- if the chosen item is active, we reroll until we get a decent item
         -- print("active item " .. findCollectible .. " was found, rerolling...")
         bonusItems:giveNewItem(player)
@@ -40,7 +32,6 @@ function bonusItems:giveNewItem(player)
         bonusItems:giveNewItem(player)
     else    
         -- print("passive item/familiar found!")
->>>>>>> wblacklist
         player:AddCollectible(findCollectible)
     end
 end
