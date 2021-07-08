@@ -2,7 +2,11 @@
 	<name>Bonus Items!</name>
 	<directory>Bonus Items!</directory>
 	<description/>
+<<<<<<< HEAD
 	<version>1.0.2</version>
+=======
+	<version>1.1.0</version>
+>>>>>>> wblacklist
 	<visibility/>
 </metadata>
 
