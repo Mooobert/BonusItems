@@ -1,6 +1,6 @@
 local bonusItems = RegisterMod("Bonus Items!", 1)
 
-local bi_items_blacklist = include("bi_items_blacklist")
+local bi_blacklist = include("bi_blacklist")
 
 function bonusItems:choosePool(player)
     local itemPools = {
@@ -27,10 +27,13 @@ function bonusItems:giveNewItem(player)
     -- print(collectibleType)
     -- items fall into 3 categories: collectibleType 1 is passive, 3 is active, and 4 is familiar
 
-    if collectibleType == 3 then -- if the chosen item is active, we reroll until we get a non-active item
+    if collectibleType == 3 then -- if the chosen item is active, we reroll until we get a decent item
         -- print("active item " .. findCollectible .. " was found, rerolling...")
         bonusItems:giveNewItem(player)
-    else
+    elseif bi_blacklist.canRollInto(findCollectible) == true then -- if the chosen item is blacklisted, we also reroll until we get a decent item
+        -- print("blacklisted item " .. findCollectible .. " was found, rerolling...")
+        bonusItems:giveNewItem(player)
+    else    
         -- print("passive item/familiar found!")
         player:AddCollectible(findCollectible)
         -- print(findCollectible .. " was given")
