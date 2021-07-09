@@ -33,6 +33,7 @@ function bonusItems:giveNewItem(player)
     else    
         -- print("passive item/familiar found!")
         player:AddCollectible(findCollectible)
+        -- print(findCollectible .. " was given")
     end
 end
 
@@ -42,6 +43,7 @@ function bonusItems:itemsPlease(player)
     for num = 1,cap do
         bonusItems:giveNewItem(player)
     end
+    -- print("-----")
 end
 
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.itemsPlease, EntityType.ENTITY_PLAYER)
