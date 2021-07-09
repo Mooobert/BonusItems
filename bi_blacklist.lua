@@ -15,12 +15,8 @@ for serving as inspiration for this mod!
 --]=]
 
 local itemsBlacklistString = [[
-    5
-    81
+    5 
     149
-    169
-    206
-    209
     222
     258
     273
@@ -28,15 +24,41 @@ local itemsBlacklistString = [[
     304
     315
     316
+    329
     330
     358
     371
     378
     402
     561
+    569
+    572
     689
     721
 ]]
+
+-- list comes loaded with 20 relatively game changing items:
+--
+-- my reflection
+-- ipecac
+-- anti-gravity
+-- missing no.
+-- bob's brain
+-- isaac's heart
+-- libra
+-- strange attractor
+-- cursed eye
+-- the ludovico technique
+-- soy milk
+-- the wiz
+-- curse of the tower
+-- no. 2
+-- chaos
+-- almond milk
+-- blood oath
+-- eye of the occult
+-- glitched crown
+-- TMTRAINER
 
 local bi_blacklist = {} -- module
 
@@ -49,9 +71,5 @@ end
 function bi_blacklist.canRollInto(ID)
     return generateBlacklist[ID]
 end
-
--- for index, id in pairs(generateBlacklist) do
---     print(index)
--- end
 
 return bi_blacklist
