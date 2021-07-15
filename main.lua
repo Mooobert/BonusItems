@@ -20,6 +20,7 @@ function bonusItems:choosePool(player)
 end
 
 function bonusItems:giveNewItem(player)
+    local pos = Isaac.GetFreeNearPosition(player.Position, 70)
     bonusItems:choosePool(player)
     findCollectible = Game():GetItemPool():GetCollectible(roomPool, false, seed, CollectibleType.COLLECTIBLE_NULL)
     -- print(findCollectible)
@@ -36,14 +37,15 @@ function bonusItems:giveNewItem(player)
         bonusItems:giveNewItem(player)
     else    
         print("passive item/familiar found!")
-        player:AddCollectible(findCollectible)
+        Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, findCollectible, pos, Vector(0, 0), player);
+        -- player:AddCollectible(findCollectible)
         print(findCollectible .. " was given")
         print("-----")
     end
 end
 ----------------------------------------------------------------------
 function bonusItems:itemsPlease(player)
-    -- player = Isaac.GetPlayer(0)
+    player = Isaac.GetPlayer(0)
     -- for i = 1, Game():GetNumPlayers() do
 	-- 	player = Isaac.GetPlayer(i-1)
     cap = math.random(1, 3)
@@ -71,9 +73,9 @@ function bonusItems:headCount(player)
 end
 ----------------------------------------------------------------------
 
-bonusItems:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, bonusItems.headCount)
+-- bonusItems:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, bonusItems.headCount)
 -- bonusItems:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, bonusItems.itemsPlease)
--- bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.itemsPlease, EntityType.ENTITY_PLAYER)
+bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.itemsPlease, EntityType.ENTITY_PLAYER)
 
 --[[
     pro tip: don't generate items that generate pickups before the level loads or else the game will crash
