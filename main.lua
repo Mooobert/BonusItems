@@ -4,7 +4,8 @@ local bi_blacklist = include("bi_blacklist")
 
 local jacob_type = 19
 local esau_type = 20
-
+local player = Isaac.GetPlayer(0)
+local playerType = player:GetPlayerType()
 
 ----------------------------------------------------------------------
 function bonusItems:choosePool(player)
@@ -24,67 +25,57 @@ function bonusItems:choosePool(player)
 end
 
 function bonusItems:giveNewItem(player)
-    local pos = Isaac.GetFreeNearPosition(player.Position, 70)
-    bonusItems:choosePool(player)
-    findCollectible = Game():GetItemPool():GetCollectible(roomPool, false, seed, CollectibleType.COLLECTIBLE_NULL)
-    -- print(findCollectible)
-    local itemConfig = Isaac.GetItemConfig()
-    collectibleType = itemConfig:GetCollectible(findCollectible).Type
-    -- print(collectibleType)
-    -- items fall into 3 categories: collectibleType 1 is passive, 3 is active, and 4 is familiar
+    if playerType == jacob_type or playerType == esau_type then
+        print("tada")
+    else
+    -- local pos = Isaac.GetFreeNearPosition(player.Position, 70)
+        bonusItems:choosePool(player)
+        findCollectible = Game():GetItemPool():GetCollectible(roomPool, false, seed, CollectibleType.COLLECTIBLE_NULL)
+        -- print(findCollectible)
+        local itemConfig = Isaac.GetItemConfig()
+        collectibleType = itemConfig:GetCollectible(findCollectible).Type
+        -- print(collectibleType)
+        -- items fall into 3 categories: collectibleType 1 is passive, 3 is active, and 4 is familiar
 
-    if collectibleType == 3 then -- if the chosen item is active, we reroll until we get a decent item
-        print("active item " .. findCollectible .. " was found, rerolling...")
-        bonusItems:giveNewItem(player)
-    elseif bi_blacklist.canRollInto(findCollectible) == true then -- if the chosen item is blacklisted, we also reroll until we get a decent item
-        print("blacklisted item " .. findCollectible .. " was found, rerolling...")
-        bonusItems:giveNewItem(player)
-    else    
-        print("passive item/familiar found!")
-        Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, findCollectible, pos, Vector(0, 0), player);
-        -- player:AddCollectible(findCollectible)
-        print(findCollectible .. " was given")
-        print("-----")
+        if collectibleType == 3 then -- if the chosen item is active, we reroll until we get a decent item
+            print("active item " .. findCollectible .. " was found, rerolling...")
+            bonusItems:giveNewItem(player)
+        elseif bi_blacklist.canRollInto(findCollectible) == true then -- if the chosen item is blacklisted, we also reroll until we get a decent item
+            print("blacklisted item " .. findCollectible .. " was found, rerolling...")
+            bonusItems:giveNewItem(player)
+        else    
+            print("passive item/familiar found!")
+            -- Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, findCollectible, pos, Vector(0, 0), player);
+            player:AddCollectible(findCollectible)
+            print(findCollectible .. " was given")
+            print("-----")
+        end
     end
 end
 ----------------------------------------------------------------------
 function bonusItems:itemsPlease(player)
-    cap = math.random(1, 3)
-    for num = 1,cap do
-        bonusItems:giveNewItem(player)
-    end
-    print('+++++')
-end
--- end
-    -- player = Isaac.GetPlayer(1)
-    -- cap = math.random(1, 3)
-    -- for num = 1,cap do
-    --     bonusItems:giveNewItem(player)
-    -- end
-    -- print('+++++')
--- end
-----------------------------------------------------------------------
-function bonusItems:headCount(player)
-    player = Isaac.GetPlayer(0)
-    local playerType = player:GetPlayerType()
     print(playerType)
-    bing = Game():GetNumPlayers()
-    print(bing)
-    if playerType == jacob_type or playerType == esau_type then
-        print("nope!")
-    else
-        -- for i = 1, Game():GetNumPlayers() do
-        --     player = Isaac.GetPlayer(i-1)
-        bonusItems:itemsPlease(player)
-        -- end
+    for i = 1, Game():GetNumPlayers() do
+        player = Isaac.GetPlayer(i-1)
+        cap = math.random(1, 3)
+        for num = 1,cap do
+            bonusItems:giveNewItem(player)
+        end
+    end
+end
+----------------------------------------------------------------------
+function bonusItems:playerCheck(player)
+    local player = Isaac.GetPlayer(0)
+    local playerType = player:GetPlayerType()
+    if playerType == jacob_type then
+        player:AddCollectible(CollectibleType.COLLECTIBLE_GENESIS, 0, false);
     end
 end
 ----------------------------------------------------------------------
 
--- bonusItems:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, bonusItems.headCount)
-bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.headCount)
 -- bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.itemsPlease)
--- bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.itemsPlease, EntityType.ENTITY_PLAYER)
+bonusItems:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, bonusItems.playerCheck)
+bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.itemsPlease, EntityType.ENTITY_PLAYER)
 
 --[[
     pro tip: don't generate items that generate pickups before the level loads or else the game will crash
