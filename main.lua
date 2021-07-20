@@ -4,8 +4,6 @@ local bi_blacklist = include("bi_blacklist")
 
 local jacob_type = 19
 local esau_type = 20
-local player = Isaac.GetPlayer(0)
-local playerType = player:GetPlayerType()
 
 ----------------------------------------------------------------------
 function bonusItems:choosePool(player)
@@ -28,7 +26,7 @@ function bonusItems:giveNewItem(player)
     if playerType == jacob_type or playerType == esau_type then
         print("tada")
     else
-    -- local pos = Isaac.GetFreeNearPosition(player.Position, 70)
+        local pos = Isaac.GetFreeNearPosition(player.Position, 70)
         bonusItems:choosePool(player)
         findCollectible = Game():GetItemPool():GetCollectible(roomPool, false, seed, CollectibleType.COLLECTIBLE_NULL)
         -- print(findCollectible)
@@ -45,8 +43,8 @@ function bonusItems:giveNewItem(player)
             bonusItems:giveNewItem(player)
         else    
             print("passive item/familiar found!")
-            -- Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, findCollectible, pos, Vector(0, 0), player);
-            player:AddCollectible(findCollectible)
+            Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, findCollectible, pos, Vector(0, 0), player);
+            -- player:AddCollectible(findCollectible)
             print(findCollectible .. " was given")
             print("-----")
         end
@@ -54,6 +52,8 @@ function bonusItems:giveNewItem(player)
 end
 ----------------------------------------------------------------------
 function bonusItems:itemsPlease(player)
+    local player = Isaac.GetPlayer(0)
+    local playerType = player:GetPlayerType()
     print(playerType)
     for i = 1, Game():GetNumPlayers() do
         player = Isaac.GetPlayer(i-1)
@@ -68,14 +68,25 @@ function bonusItems:playerCheck(player)
     local player = Isaac.GetPlayer(0)
     local playerType = player:GetPlayerType()
     if playerType == jacob_type then
-        player:AddCollectible(CollectibleType.COLLECTIBLE_GENESIS, 0, false);
+        -- player:AddCollectible(CollectibleType.COLLECTIBLE_GENESIS, 0, false);
+        -- Isaac.ExecuteCommand("goto s.isaacs")
+        Isaac.ExecuteCommand("gridspawn 1900 22")
+        Isaac.ExecuteCommand("gridspawn 1900 61")
+        Isaac.ExecuteCommand("gridspawn 1900 73")
+        Isaac.ExecuteCommand("gridspawn 1900 112")
+        -- try spawning blocks using specific coordinates
     end
+end
+----------------------------------------------------------------------
+function bonusItems:test()
 end
 ----------------------------------------------------------------------
 
 -- bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.itemsPlease)
-bonusItems:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, bonusItems.playerCheck)
-bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.itemsPlease, EntityType.ENTITY_PLAYER)
+-- bonusItems:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, bonusItems.playerCheck)
+bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.itemsPlease)
+-- bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.test)
+
 
 --[[
     pro tip: don't generate items that generate pickups before the level loads or else the game will crash
