@@ -20,7 +20,7 @@ function bonusItems:choosePool(player)
     roomPool = itemPools[math.random(1,8)]
     -- simplest random selection method I could think of that would yield somewhat balanced item pool draws
 end
-
+----------------------------------------------------------------------
 function bonusItems:giveNewItem(player)
     local level = Game():GetLevel()
     local pos = Isaac.GetFreeNearPosition(player.Position, 70)
@@ -50,8 +50,8 @@ function bonusItems:itemsPlease(player)
             the 'supporting' character inherits the 'dominant' character's unique id
             when initialized and don't receive their own items until the second stage. I imagine this is probably 
             done to prevent multiplayer issues where multiple players might controls multiple characters.
-            ]]  
-        else                                 
+            ]]
+        else
             cap = math.random(1,3)
         end
         for num = 1,cap do
