@@ -61,7 +61,6 @@ function bonusItems:itemsPlease(player)
 end
 ----------------------------------------------------------------------
 
--- bonusItems:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, bonusItems.itemsPlease)
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.itemsPlease)
 
 --[[
