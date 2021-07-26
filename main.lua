@@ -8,6 +8,7 @@ local jacob_type = 19
 local tforgotten_type = 35
 local destroyed = false
 local room = Game():GetRoom()
+local state = ""
 
 ----------------------------------------------------------------------
 function choosePool(player)
@@ -32,7 +33,7 @@ function bonusItems:giveNewItem(player)
     findCollectible = Game():GetItemPool():GetCollectible(roomPool, false, seed, CollectibleType.COLLECTIBLE_NULL)
     local itemConfig = Isaac.GetItemConfig()
     collectibleType = itemConfig:GetCollectible(findCollectible).Type
-    -- items fall into 3 categories: collectibleType 1 is passive, 3 is active, and 4 is familiar (2 is trinkets)
+    -- items fall into 3 categories: collectibleType 1 is passive, 3s is active, and 4 is familiar (2 is trinkets)
 
     if collectibleType == 3 then -- if the chosen item is active, we reroll until we get a decent item
         bonusItems:giveNewItem(player)
@@ -65,34 +66,54 @@ function bonusItems:itemsPlease(player)
     end
 end
 ----------------------------------------------------------------------
-function bonusItems:generateToybox()
-    player = Isaac.GetPlayer(0)
-    if Game():GetLevel():GetCurrentRoomIndex() == Game():GetLevel():GetStartingRoomIndex() then
-        toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(116), Vector(0,0), player);
-        destroyed = false
-    end    
-end
-----------------------------------------------------------------------
-function bonusItems:updateToybox()
-    for i = 1, Game():GetNumPlayers() do
-		player = Isaac.GetPlayer(i-1)
-        -- local room = Game():GetRoom()
-		dist = toyboxEntity.Position:Distance(player.Position)
-        if dist >= 25 and destroyed == false then
-            s = toyboxEntity:GetSprite()
-            s:Play("Idle", true)
-        elseif dist < 25 and destroyed == false then
-            s = toyboxEntity:GetSprite()
-            s:Play("Use", true)
+function bonusItems:initToybox()
+    local room = Game():GetRoom()
+
+	if (Game():IsGreedMode() == false and Game():GetLevel():GetCurrentRoomIndex() == Game():GetLevel():GetStartingRoomIndex())
+	or (Game():IsGreedMode() == true  and Game():GetLevel():GetCurrentRoomIndex() == 98)                                 
+	or (Game():IsGreedMode() == false and Game():GetLevel():GetCurrentRoomIndex() == 97 and Game():GetLevel():GetStage() == 9) then
+        local ent = Isaac.FindByType(toyBox, toyboxVar)
+        if #ent > 0 then
+			toyboxEntity = ent[1]
+			if destroyed == true then
+				s = toyboxEntity:GetSprite()
+				s:Play("Destroyed",true)
+			end
+			return
 		end
+
+        if (toyboxEntity == nil) or (toyboxEntity:Exists() == false) then
+			if Game():IsGreedMode() == false then
+			    toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(116), Vector(0,0), Isaac.GetPlayer(0));
+            elseif Game():IsGreedMode() == true then
+                toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(221), Vector(0,0), Isaac.GetPlayer(0));
+            end
+            s = toyboxEntity:GetSprite()
+			s:Play("Idle",true)
+			destroyed = false
+        end
+    else
+        toyboxEntity = nil
     end
 end
 
 ----------------------------------------------------------------------
-function bonusItems:checkBoxState()
-    if (toyboxEntity ~= nil and Game():GetLevel():GetCurrentRoomIndex() == Game():GetLevel():GetStartingRoomIndex()) then
-        if destroyed == true then
+function bonusItems:updateToyboxState(entity)
+    local dist = 0
+
+	if toyboxEntity == nil then
+		return
+	end
+
+    for i = 1, Game():GetNumPlayers() do
+		player = Isaac.GetPlayer(i-1)
+		dist = toyboxEntity.Position:Distance(player.Position)
+        if dist < 25 and destroyed == false then
             s = toyboxEntity:GetSprite()
+            s:Play("Use", true)
+        elseif dist >= 25 and destroyed == false then
+            s:Play("Idle", true)
+        else
             s:Play("Destroyed", true)
         end
     end
@@ -126,7 +147,7 @@ function generatePickups(pos)
     end
 end
 ----------------------------------------------------------------------
-local function DamageBox(p1, p2, p3, flags, p4)
+function DamageBox(p1, p2, p3, flags, p4)
 	if toyboxEntity ~= nil then
 		if (flags & DamageFlag.DAMAGE_EXPLOSION) ~= 0 then
 			s = toyboxEntity:GetSprite()
@@ -139,12 +160,12 @@ local function DamageBox(p1, p2, p3, flags, p4)
 		return false
 	end
 end
-bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, DamageBox, toyBox)
 ----------------------------------------------------------------------
 
-bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, bonusItems.generateToybox)
-bonusItems:AddCallback(ModCallbacks.MC_NPC_UPDATE, bonusItems.updateToybox, toyBox)
-bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, bonusItems.checkBoxState)
+bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, bonusItems.initToybox)
+bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, DamageBox, toyBox)
+bonusItems:AddCallback(ModCallbacks.MC_NPC_UPDATE, bonusItems.updateToyboxState, toyBox)
+
 
 --[[
     I orginally tried to program a real solution to give Jacob and Esau compatibility, but there is so much
