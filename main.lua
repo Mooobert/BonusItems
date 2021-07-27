@@ -7,8 +7,6 @@ local toyboxVar = Isaac.GetEntityVariantByName("Toy Box")
 local jacob_type = 19
 local tforgotten_type = 35
 local destroyed = false
-local room = Game():GetRoom()
-local state = ""
 
 ----------------------------------------------------------------------
 function choosePool(player)
@@ -25,6 +23,7 @@ function choosePool(player)
     roomPool = itemPools[math.random(1,8)]
     -- simplest random selection method I could think of that would yield somewhat balanced item pool draws
 end
+----------------------------------------------------------------------
 
 function bonusItems:giveNewItem(player)
     local level = Game():GetLevel()
@@ -42,6 +41,8 @@ function bonusItems:giveNewItem(player)
     else    
         Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, findCollectible, pos, Vector(0, 0), player);
         -- player:AddCollectible(findCollectible)
+        -- print(findCollectible .. " was given")
+        -- print("-----")
     end
 end
 ----------------------------------------------------------------------
@@ -68,10 +69,11 @@ end
 ----------------------------------------------------------------------
 function bonusItems:initToybox()
     local room = Game():GetRoom()
+    print(Game():GetLevel():GetCurrentRoomIndex())
 
 	if (Game():IsGreedMode() == false and Game():GetLevel():GetCurrentRoomIndex() == Game():GetLevel():GetStartingRoomIndex())
-	or (Game():IsGreedMode() == true  and Game():GetLevel():GetCurrentRoomIndex() == 98)                                 
-	or (Game():IsGreedMode() == false and Game():GetLevel():GetCurrentRoomIndex() == 97 and Game():GetLevel():GetStage() == 9) then
+    or (Game():IsGreedMode() == false and Game():GetLevel():GetCurrentRoomIndex() == 97 and Game():GetLevel():GetStage() == 9)
+	or (Game():IsGreedMode() == true  and Game():GetLevel():GetCurrentRoomIndex() == 98) then
         local ent = Isaac.FindByType(toyBox, toyboxVar)
         if #ent > 0 then
 			toyboxEntity = ent[1]
@@ -96,7 +98,6 @@ function bonusItems:initToybox()
         toyboxEntity = nil
     end
 end
-
 ----------------------------------------------------------------------
 function bonusItems:updateToyboxState(entity)
     local dist = 0
@@ -133,6 +134,7 @@ function choosePickupPool()
 end
 ----------------------------------------------------------------------
 function generatePickups(pos)
+    local room = Game():GetRoom()
     if destroyed == false then
         for i = 1, 3 do
             pickupChoice = choosePickupPool()
@@ -147,9 +149,9 @@ function generatePickups(pos)
     end
 end
 ----------------------------------------------------------------------
-function DamageBox(p1, p2, p3, flags, p4)
+function boxDamage(p1, p2, p3, flags, p4)
 	if toyboxEntity ~= nil then
-		if (flags & DamageFlag.DAMAGE_EXPLOSION) ~= 0 then
+		if (flags & DamageFlag.DAMAGE_EXPLOSION) ~= 0 and destroyed == false then
 			s = toyboxEntity:GetSprite()
 			s:Play("Destroyed", true)
             Isaac.Spawn(1000, 15, 0, toyboxEntity.Position, Vector(0,0), player)
@@ -163,9 +165,8 @@ end
 ----------------------------------------------------------------------
 
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, bonusItems.initToybox)
-bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, DamageBox, toyBox)
+bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, boxDamage)
 bonusItems:AddCallback(ModCallbacks.MC_NPC_UPDATE, bonusItems.updateToyboxState, toyBox)
-
 
 --[[
     I orginally tried to program a real solution to give Jacob and Esau compatibility, but there is so much
