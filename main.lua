@@ -39,16 +39,10 @@ function bonusItems:giveNewItem(player)
 
     if collectibleType == 3 then -- if the chosen item is active, we reroll until we get a decent item
         bonusItems:giveNewItem(player)
-        -- print("active item " .. findCollectible .. " was found, rerolling...")
     elseif bi_blacklist.canRollInto(findCollectible) == true then -- if the chosen item is blacklisted, we also reroll until we get a decent item
         bonusItems:giveNewItem(player)   
-        -- print("blacklisted item " .. findCollectible .. " was found, rerolling...")
     else    
-        -- print("passive item/familiar found!")
         Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, findCollectible, pos, Vector(0, 0), player);
-        -- player:AddCollectible(findCollectible)
-        -- print(findCollectible .. " was given")
-        -- print("-----")
     end
 end
 ----------------------------------------------------------------------
@@ -197,8 +191,6 @@ bonusItems:AddCallback(ModCallbacks.MC_NPC_UPDATE, bonusItems.updateToyboxState,
 bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, itemSpawnCheck)
 bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, playOpenSound)
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, resetTrackers)
-
--- bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, lionScan)
 
 --[[
     I orginally tried to program a solution to give Jacob and Esau proper compatibility, but there is so much
