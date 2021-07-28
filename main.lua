@@ -6,6 +6,7 @@ local toyboxVar = Isaac.GetEntityVariantByName("Toy Box")
 
 local jacob_type = 19
 local tforgotten_type = 35
+local toyboxEntity = nil
 local destroyed = false
 local itemsDropped = false
 
@@ -38,10 +39,16 @@ function bonusItems:giveNewItem(player)
 
     if collectibleType == 3 then -- if the chosen item is active, we reroll until we get a decent item
         bonusItems:giveNewItem(player)
+        -- print("active item " .. findCollectible .. " was found, rerolling...")
     elseif bi_blacklist.canRollInto(findCollectible) == true then -- if the chosen item is blacklisted, we also reroll until we get a decent item
         bonusItems:giveNewItem(player)   
+        -- print("blacklisted item " .. findCollectible .. " was found, rerolling...")
     else    
+        -- print("passive item/familiar found!")
         Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, findCollectible, pos, Vector(0, 0), player);
+        -- player:AddCollectible(findCollectible)
+        -- print(findCollectible .. " was given")
+        -- print("-----")
     end
 end
 ----------------------------------------------------------------------
@@ -101,9 +108,9 @@ function bonusItems:initToybox()
 	if (Game():IsGreedMode() == false and Game():GetLevel():GetCurrentRoomIndex() == Game():GetLevel():GetStartingRoomIndex())
     or (Game():IsGreedMode() == false and Game():GetLevel():GetCurrentRoomIndex() == 97 and Game():GetLevel():GetStage() == 9)
 	or (Game():IsGreedMode() == true  and Game():GetLevel():GetCurrentRoomIndex() == 98) then
-        local ent = Isaac.FindByType(toyBox, toyboxVar)
-        if #ent > 0 then
-			toyboxEntity = ent[1]
+        local entities = Isaac.FindByType(toyBox, toyboxVar)
+        if #entities > 0 then
+			toyboxEntity = entities[1]
 			if destroyed == true then
 				sprite = toyboxEntity:GetSprite()
 				sprite:Play("Destroyed",true)
@@ -164,7 +171,7 @@ function itemSpawnCheck() -- check done to generate items the first time the che
     if toyboxEntity ~= nil then
         player = Isaac.GetPlayer(0)
         dist = toyboxEntity.Position:Distance(player.Position)
-        if dist < 25 and itemsDropped == false then
+        if dist < 25 and itemsDropped == false and destroyed == false then
             itemsPlease(player)
             itemsDropped = true
         end
