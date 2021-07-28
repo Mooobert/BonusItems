@@ -40,9 +40,6 @@ function bonusItems:giveNewItem(player)
         bonusItems:giveNewItem(player)
     else    
         Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, findCollectible, pos, Vector(0, 0), player);
-        -- player:AddCollectible(findCollectible)
-        -- print(findCollectible .. " was given")
-        -- print("-----")
     end
 end
 ----------------------------------------------------------------------
@@ -69,7 +66,6 @@ end
 ----------------------------------------------------------------------
 function bonusItems:initToybox()
     local room = Game():GetRoom()
-    print(Game():GetLevel():GetCurrentRoomIndex())
 
 	if (Game():IsGreedMode() == false and Game():GetLevel():GetCurrentRoomIndex() == Game():GetLevel():GetStartingRoomIndex())
     or (Game():IsGreedMode() == false and Game():GetLevel():GetCurrentRoomIndex() == 97 and Game():GetLevel():GetStage() == 9)
@@ -85,10 +81,10 @@ function bonusItems:initToybox()
 		end
 
         if (toyboxEntity == nil) or (toyboxEntity:Exists() == false) then
-			if Game():IsGreedMode() == false then
-			    toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(116), Vector(0,0), Isaac.GetPlayer(0));
-            elseif Game():IsGreedMode() == true then
-                toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(221), Vector(0,0), Isaac.GetPlayer(0));
+			if Game():IsGreedMode() == true then
+			    toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(112), Vector(0,0), Isaac.GetPlayer(0));
+            else
+                toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(116), Vector(0,0), Isaac.GetPlayer(0));
             end
             s = toyboxEntity:GetSprite()
 			s:Play("Idle",true)
@@ -98,6 +94,7 @@ function bonusItems:initToybox()
         toyboxEntity = nil
     end
 end
+
 ----------------------------------------------------------------------
 function bonusItems:updateToyboxState(entity)
     local dist = 0
@@ -133,18 +130,11 @@ function choosePickupPool()
     return chosenPool
 end
 ----------------------------------------------------------------------
-function generatePickups(pos)
-    local room = Game():GetRoom()
+function generatePickups()
     if destroyed == false then
         for i = 1, 3 do
             pickupChoice = choosePickupPool()
-            if i == 1 then 
-                Isaac.Spawn(5, pickupChoice, 0, room:GetGridPosition(101), Vector(0,0), nil)
-            elseif i == 2 then 
-                Isaac.Spawn(5, pickupChoice, 0, room:GetGridPosition(115), Vector(0,0), nil)
-            else 
-                Isaac.Spawn(5, pickupChoice, 0, room:GetGridPosition(117), Vector(0,0), nil) -- obscene way to generate pickups, but I couldn't figure out how to make 
-            end                                                                              -- them "fly" from the toybox like a normal chest would
+            Isaac.Spawn(5, pickupChoice, 0, toyboxEntity.Position, Vector(math.random(-10,10),math.random(-10,10)), nil)
         end
     end
 end
@@ -153,10 +143,9 @@ function boxDamage(p1, p2, p3, flags, p4)
 	if toyboxEntity ~= nil then
 		if (flags & DamageFlag.DAMAGE_EXPLOSION) ~= 0 and destroyed == false then
 			s = toyboxEntity:GetSprite()
-			s:Play("Destroyed", true)
+			s:Play("Destroyed", true)   
             Isaac.Spawn(1000, 15, 0, toyboxEntity.Position, Vector(0,0), player)
-            local spawnpos = Game():GetRoom():FindFreePickupSpawnPosition(toyboxEntity.Position, 1, false)
-            generatePickups(spawnpos)
+            generatePickups()
             destroyed = true
         end
 		return false
