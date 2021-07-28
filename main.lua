@@ -8,7 +8,6 @@ local jacob_type = 19
 local tforgotten_type = 35
 local destroyed = false
 local itemsDropped = false
-local counter = 0
 
 ----------------------------------------------------------------------
 function choosePool(player)
@@ -46,31 +45,25 @@ end
 ----------------------------------------------------------------------
 function bonusItems:itemsPlease(player)
     if itemsDropped == false then
-        if counter < 1 then
-            for i = 1, Game():GetNumPlayers() do
-                player = Isaac.GetPlayer(i-1)
-                playerType = player:GetPlayerType() 
-                if playerType == jacob_type or playerType == tforgotten_type then 
-                    cap = math.random(2,3)  
-                    --[[
-                    this check and compensation is done for double characters (j&e and tForgotten) because, for whatever reason,
-                    the 'supporting' character inherits the 'dominant' character's unique id
-                    when initialized and don't receive their own items until the second stage. I imagine this is probably 
-                    done to prevent multiplayer issues where multiple players might controls multiple characters.
-                    ]]  
-                else                                 
-                    cap = math.random(1,3)
-                end
-                for num = 1,cap do
-                    bonusItems:giveNewItem(player)
-                end
+        for i = 1, Game():GetNumPlayers() do
+            player = Isaac.GetPlayer(i-1)
+            playerType = player:GetPlayerType() 
+            if playerType == jacob_type or playerType == tforgotten_type then 
+                cap = math.random(2,3)  
+                --[[
+                this check and compensation is done for double characters (j&e and tForgotten) because, for whatever reason,
+                the 'supporting' character inherits the 'dominant' character's unique id
+                when initialized and don't receive their own items until the second stage. I imagine this is probably 
+                done to prevent multiplayer issues where multiple players might controls multiple characters.
+                ]]  
+            else                                 
+                cap = math.random(1,3)
             end
-            counter = counter + 1
-        else
-            ::continue::
+            for num = 1,cap do
+                bonusItems:giveNewItem(player)
+            end
         end
     end
-    itemsDropped = true
 end
 ----------------------------------------------------------------------
 function bonusItems:initToybox()
@@ -118,7 +111,6 @@ function bonusItems:updateToyboxState(entity)
         if dist < 25 and destroyed == false then
             s = toyboxEntity:GetSprite()
             s:Play("Use", true)
-            bonusItems:itemsPlease(player)
         elseif dist >= 25 and destroyed == false then
             s:Play("Idle", true)
         elseif destroyed == true and (itemsDropped == true or itemsDropped == false) then
@@ -162,16 +154,27 @@ function boxDamage(p1, p2, p3, flags, p4)
 	end
 end
 ----------------------------------------------------------------------
+function itemSpawnCheck()
+    if toyboxEntity ~= nil then
+        player = Isaac.GetPlayer(0)
+        dist = toyboxEntity.Position:Distance(player.Position)
+        if dist < 25 and itemsDropped == false then
+            bonusItems:itemsPlease(player)
+            itemsDropped = true
+        end
+    end
+end
+----------------------------------------------------------------------
 function resetTrackers()
     itemsDropped = false
-    counter = 0
 end
 ----------------------------------------------------------------------
 
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, bonusItems.initToybox)
 bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, boxDamage)
 bonusItems:AddCallback(ModCallbacks.MC_NPC_UPDATE, bonusItems.updateToyboxState, toyBox)
-bonusItems:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, resetTrackers)
+bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, resetTrackers)
+bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, itemSpawnCheck)   
 
 --[[
     I orginally tried to program a real solution to give Jacob and Esau compatibility, but there is so much
