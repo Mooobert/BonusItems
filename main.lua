@@ -184,12 +184,21 @@ function resetTrackers()
     itemsDropped = false -- used exclusively to set a cap on the amount of times a toybox will generate items
 end
 ----------------------------------------------------------------------
+function playOpenSound()
+    if dist < 25 and destroyed == false then
+        SFXManager():Play(SoundEffect.SOUND_CHEST_OPEN, 1, 10, false, 1.5)
+    end
+end
+----------------------------------------------------------------------
 
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, bonusItems.initToybox)
 bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, boxDamage)
 bonusItems:AddCallback(ModCallbacks.MC_NPC_UPDATE, bonusItems.updateToyboxState, toyBox)
-bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, itemSpawnCheck)  
+bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, itemSpawnCheck)
+bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, playOpenSound)
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, resetTrackers)
+
+-- bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, lionScan)
 
 --[[
     I orginally tried to program a solution to give Jacob and Esau proper compatibility, but there is so much
