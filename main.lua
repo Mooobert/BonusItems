@@ -189,7 +189,7 @@ bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, bonusItems.initToybox)
 bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, boxDamage)
 bonusItems:AddCallback(ModCallbacks.MC_NPC_UPDATE, bonusItems.updateToyboxState, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, itemSpawnCheck)
-bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, playOpenSound)
+bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, playOpenSound, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, resetTrackers)
 
 --[[
