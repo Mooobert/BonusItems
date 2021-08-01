@@ -129,7 +129,6 @@ end
 ----------------------------------------------------------------------
 function bonusItems:updateToyboxState(entity)
     local dist = 0
-
 	if toyboxEntity == nil then
 		return
 	end
@@ -137,10 +136,12 @@ function bonusItems:updateToyboxState(entity)
     for i = 1, Game():GetNumPlayers() do
 		player = Isaac.GetPlayer(i-1)
 		dist = toyboxEntity.Position:Distance(player.Position)
-        if dist < 25 and destroyed == false then
+        if dist < 25 and destroyed == false and itemsDropped == false then
             sprite = toyboxEntity:GetSprite()
-            sprite:Play("Use", true)
-        elseif dist >= 25 and destroyed == false then
+            sprite:Play("UseOne", true)
+        elseif dist < 25 and destroyed == false and itemsDropped == true then
+            sprite:Play("UseMore", true)
+        elseif dist >= 25 and destroyed == false and (itemsDropped == true or itemsDropped == true) then
             sprite:Play("Idle", true)
         elseif destroyed == true and (itemsDropped == true or itemsDropped == false) then
             sprite:Play("Destroyed", true)
