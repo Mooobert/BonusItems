@@ -1,10 +1,12 @@
 local bonusItems = RegisterMod("Bonus Items!", 1)
 
-local bi_blacklist = include("bi_blacklist")
+local biBlacklist = include("bi_blacklist")
 local toyBox = Isaac.GetEntityTypeByName("Toy Box")
 local toyboxVar = Isaac.GetEntityVariantByName("Toy Box")
 
 local jacobType = 19
+local tLazAliveType = 29
+local tLazDeadType = 38
 local tForgottenType = 35
 local toyboxEntity = nil
 local destroyed = false
@@ -39,16 +41,10 @@ function bonusItems:giveNewItem(player)
 
     if collectibleType == 3 then -- if the chosen item is active, we reroll until we get a decent item
         bonusItems:giveNewItem(player)
-        -- print("active item " .. findCollectible .. " was found, rerolling...")
-    elseif bi_blacklist.canRollInto(findCollectible) == true then -- if the chosen item is blacklisted, we also reroll until we get a decent item
+    elseif biBlacklist.canRollInto(findCollectible) == true then -- if the chosen item is blacklisted, we also reroll until we get a decent item
         bonusItems:giveNewItem(player)   
-        -- print("blacklisted item " .. findCollectible .. " was found, rerolling...")
     else    
-        -- print("passive item/familiar found!")
         Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, findCollectible, pos, Vector(0, 0), player);
-        -- player:AddCollectible(findCollectible)
-        -- print(findCollectible .. " was given")
-        -- print("-----")
     end
 end
 ----------------------------------------------------------------------
@@ -57,7 +53,7 @@ function itemsPlease(player)
         for i = 1, Game():GetNumPlayers() do
             player = Isaac.GetPlayer(i-1)
             playerType = player:GetPlayerType() 
-            if playerType == jacobType or playerType == tForgottenType then 
+            if playerType == jacobType or playerType == tForgottenType or tLazAliveType or tLazDeadType then 
                 cap = 2  
                 --[[
                 this check and compensation is done for double characters (j&e/tForgotten/tLaz) because, for whatever reason,
