@@ -4,8 +4,8 @@ local bi_blacklist = include("bi_blacklist")
 local toyBox = Isaac.GetEntityTypeByName("Toy Box")
 local toyboxVar = Isaac.GetEntityVariantByName("Toy Box")
 
-local jacob_type = 19
-local tforgotten_type = 35
+local jacobType = 19
+local tForgottenType = 35
 local toyboxEntity = nil
 local destroyed = false
 local itemsDropped = false
@@ -39,10 +39,16 @@ function bonusItems:giveNewItem(player)
 
     if collectibleType == 3 then -- if the chosen item is active, we reroll until we get a decent item
         bonusItems:giveNewItem(player)
+        -- print("active item " .. findCollectible .. " was found, rerolling...")
     elseif bi_blacklist.canRollInto(findCollectible) == true then -- if the chosen item is blacklisted, we also reroll until we get a decent item
         bonusItems:giveNewItem(player)   
+        -- print("blacklisted item " .. findCollectible .. " was found, rerolling...")
     else    
+        -- print("passive item/familiar found!")
         Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, findCollectible, pos, Vector(0, 0), player);
+        -- player:AddCollectible(findCollectible)
+        -- print(findCollectible .. " was given")
+        -- print("-----")
     end
 end
 ----------------------------------------------------------------------
@@ -51,16 +57,16 @@ function itemsPlease(player)
         for i = 1, Game():GetNumPlayers() do
             player = Isaac.GetPlayer(i-1)
             playerType = player:GetPlayerType() 
-            if playerType == jacob_type or playerType == tforgotten_type then 
-                cap = math.random(2,3)  
+            if playerType == jacobType or playerType == tForgottenType then 
+                cap = 2  
                 --[[
-                this check and compensation is done for double characters (j&e and tForgotten) because, for whatever reason,
-                the 'supporting' character inherits the 'dominant' character's unique id
+                this check and compensation is done for double characters (j&e/tForgotten/tLaz) because, for whatever reason,
+                the 'supporting' character inherits the 'dominant' character's unique id (except tLaz, but they're still a double character)
                 when initialized and don't receive their own items until the second stage. I imagine this is probably 
                 done to prevent multiplayer issues where multiple players might controls multiple characters.
                 ]]  
-            else                                 
-                cap = math.random(1,3)
+            else
+                cap = math.random(1,2)
             end
             for num = 1,cap do
                 bonusItems:giveNewItem(player)
@@ -136,12 +142,12 @@ function bonusItems:updateToyboxState(entity)
     for i = 1, Game():GetNumPlayers() do
 		player = Isaac.GetPlayer(i-1)
 		dist = toyboxEntity.Position:Distance(player.Position)
+        sprite = toyboxEntity:GetSprite()
         if dist < 25 and destroyed == false and itemsDropped == false then
-            sprite = toyboxEntity:GetSprite()
-            sprite:Play("UseOne", true)
+            sprite:Play("FirstUse", true)
         elseif dist < 25 and destroyed == false and itemsDropped == true then
-            sprite:Play("UseMore", true)
-        elseif dist >= 25 and destroyed == false and (itemsDropped == true or itemsDropped == true) then
+            sprite:Play("2+Use", true)
+        elseif dist >= 25 and destroyed == false and (itemsDropped == false or itemsDropped == true) then
             sprite:Play("Idle", true)
         elseif destroyed == true and (itemsDropped == true or itemsDropped == false) then
             sprite:Play("Destroyed", true)
@@ -175,8 +181,8 @@ end
 ----------------------------------------------------------------------
 -- Cleanup/Support
 ----------------------------------------------------------------------
-function resetTrackers()
-    itemsDropped = false -- used exclusively to set a cap on the amount of times a toybox will generate items
+function resetLevelTracker()
+    itemsDropped = false -- used to reset a cap on the amount of times a toybox will generate items per level
 end
 ----------------------------------------------------------------------
 function playOpenSound()
@@ -187,11 +193,11 @@ end
 ----------------------------------------------------------------------
 
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, bonusItems.initToybox)
-bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, boxDamage)
+bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, boxDamage, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_NPC_UPDATE, bonusItems.updateToyboxState, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, itemSpawnCheck)
 bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, playOpenSound, toyBox)
-bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, resetTrackers)
+bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, resetLevelTracker)
 
 --[[
     I orginally tried to program a solution to give Jacob and Esau proper compatibility, but there is so much
