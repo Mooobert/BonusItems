@@ -26,13 +26,10 @@ function chooseItemPool(player)
         ItemPoolType.POOL_TREASURE, -- 0
         ItemPoolType.POOL_GOLDEN_CHEST, -- 8
     }
-    roomPool = itemPools[math.random(1,8)]
-    -- simplest random selection method I could think of that would yield somewhat balanced item pool draws
+    roomPool = itemPools[math.random(1,8)] -- simplest random selection method I could think of that would yield somewhat balanced item pool draws
 end
 ----------------------------------------------------------------------
 function bonusItems:giveNewItem(player)
-    local level = Game():GetLevel()
-    local pos = Isaac.GetFreeNearPosition(toyboxEntity.Position, 70)
     chooseItemPool(player)
     findCollectible = Game():GetItemPool():GetCollectible(roomPool, false, seed, CollectibleType.COLLECTIBLE_NULL)
     local itemConfig = Isaac.GetItemConfig()
@@ -43,7 +40,8 @@ function bonusItems:giveNewItem(player)
         bonusItems:giveNewItem(player)
     elseif biBlacklist.canRollInto(findCollectible) == true then -- if the chosen item is blacklisted, we also reroll until we get a decent item
         bonusItems:giveNewItem(player)   
-    else    
+    else
+        local pos = Isaac.GetFreeNearPosition(toyboxEntity.Position, 70)
         Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, findCollectible, pos, Vector(0, 0), player);
     end
 end
@@ -53,7 +51,7 @@ function itemsPlease(player)
         for i = 1, Game():GetNumPlayers() do
             player = Isaac.GetPlayer(i-1)
             playerType = player:GetPlayerType() 
-            if playerType == jacobType or playerType == tForgottenType or tLazAliveType or tLazDeadType then 
+            if playerType == jacobType or playerType == tForgottenType or playerType == tLazAliveType or playerType == tLazDeadType then 
                 cap = 2  
                 --[[
                 this check and compensation is done for double characters (j&e/tForgotten/tLaz) because, for whatever reason,
@@ -115,10 +113,14 @@ function bonusItems:initToybox()
 		end
 
         if (toyboxEntity == nil) or (toyboxEntity:Exists() == false) then
-			if Game():IsGreedMode() == true then
-			    toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(112), Vector(0,0), Isaac.GetPlayer(0));
+			if Game():IsGreedMode() ~= true then
+                if Game():GetLevel():GetStage() == 9 then
+                    toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(221), Vector(0,0), Isaac.GetPlayer(0));
+                else
+			        toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(116), Vector(0,0), Isaac.GetPlayer(0));
+                end
             else
-                toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(116), Vector(0,0), Isaac.GetPlayer(0));
+                toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(112), Vector(0,0), Isaac.GetPlayer(0));
             end
             sprite = toyboxEntity:GetSprite()
 			sprite:Play("Idle",true)
@@ -153,6 +155,7 @@ end
 ----------------------------------------------------------------------
 function boxDamage(p1, p2, p3, flags, p4) -- check done to generate pickups the first time the toybox is bombed
 	if toyboxEntity ~= nil then
+        -- dist2 = toyboxEntity.Position:Distance(explosion.Position)
 		if (flags & DamageFlag.DAMAGE_EXPLOSION) ~= 0 and destroyed == false then
 			sprite = toyboxEntity:GetSprite()
 			sprite:Play("Destroyed", true)   
@@ -197,8 +200,7 @@ bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, resetLevelTracker)
 
 --[[
     I orginally tried to program a solution to give Jacob and Esau proper compatibility, but there is so much
-    bulls**t I don't understand when it came to callback logic I used to give/spawn items, I decided to opt for a workaround instead
+    horsepoop I don't understand when it came to callback logic I used to give/spawn items, I decided to opt for a workaround instead
 
     pro tip:    don't generate items that generate pickups before the level loads or else the game will crash
-    note:       lil delirium and red key may also have game crashing properties, but I am completely oblivious as to why
 ]]
