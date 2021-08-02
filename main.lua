@@ -4,10 +4,8 @@ local biBlacklist = include("bi_blacklist")
 local toyBox = Isaac.GetEntityTypeByName("Toy Box")
 local toyboxVar = Isaac.GetEntityVariantByName("Toy Box")
 
-local jacobType = 19
 local tLazAliveType = 29
 local tLazDeadType = 38
-local tForgottenType = 35
 local toyboxEntity = nil
 local destroyed = false
 local itemsDropped = false
@@ -50,18 +48,8 @@ function itemsPlease(player)
     if itemsDropped == false then
         for i = 1, Game():GetNumPlayers() do
             player = Isaac.GetPlayer(i-1)
-            playerType = player:GetPlayerType() 
-            if playerType == jacobType or playerType == tForgottenType or playerType == tLazAliveType or playerType == tLazDeadType then 
-                cap = 2  
-                --[[
-                this check and compensation is done for double characters (j&e/tForgotten/tLaz) because, for whatever reason,
-                the 'supporting' character inherits the 'dominant' character's unique id (except tLaz, but they're still a double character)
-                when initialized and don't receive their own items until the second stage. I imagine this is probably 
-                done to prevent multiplayer issues where multiple players might controls multiple characters.
-                ]]  
-            else
-                cap = math.random(1,2)
-            end
+            pType = player:GetPlayerType() 
+            if pType == tLazAliveType or pType == tLazDeadType then cap = 2 else cap = 1 end
             for num = 1,cap do
                 bonusItems:giveNewItem(player)
             end
@@ -155,8 +143,7 @@ end
 ----------------------------------------------------------------------
 function boxDamage(p1, p2, p3, flags, p4) -- check done to generate pickups the first time the toybox is bombed
 	if toyboxEntity ~= nil then
-        -- dist2 = toyboxEntity.Position:Distance(explosion.Position)
-		if (flags & DamageFlag.DAMAGE_EXPLOSION) ~= 0 and destroyed == false then
+		if (flags & DamageFlag.DAMAGE_EXPLOSION) ~= 0 and destroyed == false then --and dist2 < 60 then
 			sprite = toyboxEntity:GetSprite()
 			sprite:Play("Destroyed", true)   
             Isaac.Spawn(1000, 15, 0, toyboxEntity.Position, Vector(0,0), player)
