@@ -149,6 +149,7 @@ function boxDamage(p1, p2, p3, flags, p4) -- check done to generate pickups the 
             Isaac.Spawn(1000, 15, 0, toyboxEntity.Position, Vector(0,0), player)
             generatePickups()
             destroyed = true
+            -- end
         end
 		return false
 	end
@@ -177,8 +178,25 @@ function playOpenSound()
     end
 end
 ----------------------------------------------------------------------
+function bombToBoxDist()
+    if destroyed == false then
+        entitiesInRadius = Isaac.FindInRadius(Vector(0,0), 25, 0xFFFFFFFF)
+        for i, entities in ipairs(entitiesInRadius) do
+            if entities == EntityType.ENTITY_BOMBDROP then
+                litBomb = entities
+                print('lit bomb!')
+            end
+        end
+        dist2 = toyboxEntity.Position:Distance(litBomb.Position)
+        if dist2 <= 25 then
+            print('woop')
+        end
+    end
+end
+----------------------------------------------------------------------
 
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, bonusItems.initToybox)
+bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, bombToBoxDist, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, boxDamage, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_NPC_UPDATE, bonusItems.updateToyboxState, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, itemSpawnCheck)
