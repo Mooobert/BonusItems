@@ -86,7 +86,11 @@ end
 ----------------------------------------------------------------------
 function bonusItems:initToybox()
     local room = Game():GetRoom()
+    local entities = Isaac.GetRoomEntities()
 
+    for i=1, #entities do
+        print(entities[i].Type)
+    end
 	if (Game():IsGreedMode() == false and Game():GetLevel():GetCurrentRoomIndex() == Game():GetLevel():GetStartingRoomIndex())
     or (Game():IsGreedMode() == false and Game():GetLevel():GetCurrentRoomIndex() == 97 and Game():GetLevel():GetStage() == 9)
 	or (Game():IsGreedMode() == true  and Game():GetLevel():GetCurrentRoomIndex() == 98) then
@@ -145,11 +149,10 @@ function boxDamage(p1, p2, p3, flags, p4) -- check done to generate pickups the 
 	if toyboxEntity ~= nil then
 		if (flags & DamageFlag.DAMAGE_EXPLOSION) ~= 0 and destroyed == false then --and dist2 < 60 then
 			sprite = toyboxEntity:GetSprite()
-			sprite:Play("Destroyed", true)   
+			sprite:Play("Destroyed", true)
             Isaac.Spawn(1000, 15, 0, toyboxEntity.Position, Vector(0,0), player)
             generatePickups()
             destroyed = true
-            -- end
         end
 		return false
 	end
@@ -180,23 +183,26 @@ end
 ----------------------------------------------------------------------
 function bombToBoxDist()
     if destroyed == false then
-        entitiesInRadius = Isaac.FindInRadius(Vector(0,0), 25, 0xFFFFFFFF)
-        for i, entities in ipairs(entitiesInRadius) do
-            if entities == EntityType.ENTITY_BOMBDROP then
-                litBomb = entities
-                print('lit bomb!')
-            end
-        end
-        dist2 = toyboxEntity.Position:Distance(litBomb.Position)
-        if dist2 <= 25 then
-            print('woop')
-        end
+        -- bomba = Isaac.FindByType(EntityType.ENTITY_BOMBDROP)
+        -- for i, entities in ipairs(entitiesInRadius) do
+        --     if entities == EntityType.ENTITY_BOMBDROP then
+        --         litBomb = entities
+        --         print('lit bomb!')
+        --     end
+        -- end
+        player = Isaac.GetPlayer(0)
+        -- bombEnt = (EntityType.ENTITY_BOMBDROP, PickupVariant.PICKUP_BOMB)
+        -- dist2 = toyboxEntity.Position:Distance(bombEnt.Position)
+        -- print("hurp")
+        -- if dist2 <= 25 then
+        --     print('woop')
+        -- end
     end
 end
 ----------------------------------------------------------------------
 
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, bonusItems.initToybox)
-bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, bombToBoxDist, toyBox)
+-- bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, bombToBoxDist, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, boxDamage, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_NPC_UPDATE, bonusItems.updateToyboxState, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, itemSpawnCheck)
