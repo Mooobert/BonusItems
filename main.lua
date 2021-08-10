@@ -50,7 +50,7 @@ function itemsPlease(player)
             player = Isaac.GetPlayer(i-1)
             pType = player:GetPlayerType() 
             if pType == tLazAliveType or pType == tLazDeadType then cap = 2 else cap = 1 end
-            for num = 1,cap do
+            for num = 1, cap do
                 bonusItems:giveNewItem(player)
             end
         end
@@ -147,12 +147,19 @@ end
 ----------------------------------------------------------------------
 function boxDamage(p1, p2, p3, flags, p4) -- check done to generate pickups the first time the toybox is bombed
 	if toyboxEntity ~= nil then
+        -- dist2 = toyboxEntity.Position:Distance(.Position)
 		if (flags & DamageFlag.DAMAGE_EXPLOSION) ~= 0 and destroyed == false then --and dist2 < 60 then
+            -- dist2 = toyboxEntity.Position:Distance(EntityBomb.Position)
+            -- print(dist2)
+            -- ActionTriggers ACTIONTRIGGER_BOMBPLACED
+            -- print(DamageFlag.DAMAGE_EXPLOSION)
+            -- if dist2 <= 25 then
 			sprite = toyboxEntity:GetSprite()
 			sprite:Play("Destroyed", true)
             Isaac.Spawn(1000, 15, 0, toyboxEntity.Position, Vector(0,0), player)
             generatePickups()
             destroyed = true
+            -- end
         end
 		return false
 	end
@@ -182,27 +189,53 @@ function playOpenSound()
 end
 ----------------------------------------------------------------------
 function bombToBoxDist()
-    if destroyed == false then
-        -- bomba = Isaac.FindByType(EntityType.ENTITY_BOMBDROP)
-        -- for i, entities in ipairs(entitiesInRadius) do
-        --     if entities == EntityType.ENTITY_BOMBDROP then
-        --         litBomb = entities
-        --         print('lit bomb!')
-        --     end
+    local room = Game():GetRoom()
+    --     for i = 1, room:GetGridSize() do
+    --         local grid = room:GetGridEntity(i)
+    --         if grid ~= nil then
+    --             print("foop")
+    --         end
+    --     end
+    -- for i = 1, entity in ipairs(Isaac.GetRoomEntities()) do
+    --     print(entity[i].Type)
+    -- end
+	local entities = Isaac.GetRoomEntities()
+    for i = 1, room:GetGridSize() do
+        local grid = room:GetGridEntity(i)
+        print(grid)
+        for j=1, #entities do
+            -- if entities[i].Type == 4 then
+            --     print("foop!")
+            if ((entities[j].Type == 4) and (entities[j] in grid == true)) then
+                print("foop")
+            end
+        end
+    end
+        -- dmgEnt = toyboxEntity:GetLastDamageSource()
+        -- is_npc = dmgEnt:ToNPC()
+
+        -- if (is_npc == true and dmgEnt:IsVulnerableEnemy()) then
+        --     print("woop")
         -- end
-        player = Isaac.GetPlayer(0)
+
         -- bombEnt = (EntityType.ENTITY_BOMBDROP, PickupVariant.PICKUP_BOMB)
         -- dist2 = toyboxEntity.Position:Distance(bombEnt.Position)
         -- print("hurp")
         -- if dist2 <= 25 then
         --     print('woop')
         -- end
-    end
+                -- bomba = Isaac.FindByType(EntityType.ENTITY_BOMBDROP)
+        -- for i, entities in ipairs(entitiesInRadius) do
+        --     if entities == EntityType.ENTITY_BOMBDROP then
+        --         litBomb = entities
+        --         print('lit bomb!')
+        --     end
+        -- end
 end
 ----------------------------------------------------------------------
 
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, bonusItems.initToybox)
--- bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, bombToBoxDist, toyBox)
+bonusItems:AddCallback(ModCallbacks.MC_POST_UPDATE, bombToBoxDist, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, boxDamage, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_NPC_UPDATE, bonusItems.updateToyboxState, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, itemSpawnCheck)
