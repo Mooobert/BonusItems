@@ -145,7 +145,6 @@ end
 function boxDamage(p1, p2, p3, flags, p4) -- check done to generate pickups the first time the toybox is bombed
 	if toyboxEntity ~= nil then
 		if (flags & DamageFlag.DAMAGE_EXPLOSION) ~= 0 and destroyed == false then
-			sprite = toyboxEntity:GetSprite()
 			sprite:Play("Destroyed", true)
             Isaac.Spawn(1000, 15, 0, toyboxEntity.Position, Vector(0,0), player)
             generatePickups()
@@ -179,34 +178,16 @@ function playOpenSound()
 end
 ----------------------------------------------------------------------
 function bombToBoxDist()
-    -- print("hewwo")
-    local room = Game():GetRoom()
-    --     for i = 1, room:GetGridSize() do
-    --         local grid = room:GetGridEntity(i)
-    --         if grid ~= nil then
-    --             print("foop")
-    --         end
-    --     end
-    -- for i = 1, entity in ipairs(Isaac.GetRoomEntities()) do
-    --     print(entity[i].Type)
-    -- end
-	-- local entities = Isaac.GetRoomEntities()
-	-- for i = 1, #entities do
-    --     for j = 1, 118 do
-    --         grid = room:GetGridPosition(j)
-    --         print(grid)
-    --         -- Isaac.Spawn(2, -1, -1, grid, Vector(0,0), player)
-    --         if (entities[i].Type == 4) and (grid == room:GetGridPosition(86)) then
-    --             print("foop!")
-    --         end
-    --     end
-    -- end
     local entities = Isaac.GetRoomEntities()
 	for i = 1, #entities do
         if (entities[i].Type == 4) then
             print("bomb!")
-        else
-            print("nothing of note")
+            bomba = entities[i]
+            dist = toyboxEntity.Position:Distance(bomba.Position)
+            print(dist)
+            if dist >= 107 then
+                print("too far!")
+            end
         end
     end
 end
