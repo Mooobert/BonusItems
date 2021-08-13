@@ -143,15 +143,26 @@ function bonusItems:updateToyboxState(entity)
 end
 ----------------------------------------------------------------------
 function boxDamage(p1, p2, p3, flags, p4) -- check done to generate pickups the first time the toybox is bombed
-	if toyboxEntity ~= nil then
-		if (flags & DamageFlag.DAMAGE_EXPLOSION) ~= 0 and destroyed == false then
-			sprite:Play("Destroyed", true)
-            Isaac.Spawn(1000, 15, 0, toyboxEntity.Position, Vector(0,0), player)
-            generatePickups()
-            destroyed = true
+    local entities = Isaac.GetRoomEntities()
+    for i = 1, #entities do
+        if (entities[i].Type == 4) then
+            print("bomb!")
+            bomba = entities[i]
+            dist = toyboxEntity.Position:Distance(bomba.Position)
+            print(dist)
+            if dist <= 107 then
+	            if toyboxEntity ~= nil then
+		            if (flags & DamageFlag.DAMAGE_EXPLOSION) ~= 0 and destroyed == false then
+			            sprite:Play("Destroyed", true)
+                        Isaac.Spawn(1000, 15, 0, toyboxEntity.Position, Vector(0,0), player)
+                        generatePickups()
+                        destroyed = true
+                    end
+                end
+            end
         end
-		return false
 	end
+    return false
 end
 ----------------------------------------------------------------------
 function itemSpawnCheck() -- check done to generate items the first time the chest is opened
@@ -177,24 +188,8 @@ function playOpenSound()
     end
 end
 ----------------------------------------------------------------------
-function bombToBoxDist()
-    local entities = Isaac.GetRoomEntities()
-	for i = 1, #entities do
-        if (entities[i].Type == 4) then
-            print("bomb!")
-            bomba = entities[i]
-            dist = toyboxEntity.Position:Distance(bomba.Position)
-            print(dist)
-            if dist >= 107 then
-                print("too far!")
-            end
-        end
-    end
-end
-----------------------------------------------------------------------
 
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, bonusItems.initToybox)
-bonusItems:AddCallback(ModCallbacks.MC_POST_UPDATE, bombToBoxDist, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, boxDamage, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_NPC_UPDATE, bonusItems.updateToyboxState, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, itemSpawnCheck)
