@@ -9,20 +9,22 @@ local tLazDeadType = 38
 local toyboxEntity = nil
 local destroyed = false
 local itemsDropped = false
+local box = Isaac.FindByType(toyBox, toyboxVar)
+
 
 ----------------------------------------------------------------------
 -- Item generation handlers
 ----------------------------------------------------------------------
 function chooseItemPool(player)
     local itemPools = {
-        ItemPoolType.POOL_TREASURE, -- 0
-        ItemPoolType.POOL_DEVIL, -- 3
-        ItemPoolType.POOL_TREASURE, -- 0
-        ItemPoolType.POOL_ANGEL, -- 4
-        ItemPoolType.POOL_TREASURE, -- 0
-        ItemPoolType.POOL_SECRET, -- 5
-        ItemPoolType.POOL_TREASURE, -- 0
-        ItemPoolType.POOL_GOLDEN_CHEST, -- 8
+        ItemPoolType.POOL_TREASURE,
+        ItemPoolType.POOL_DEVIL,
+        ItemPoolType.POOL_TREASURE,
+        ItemPoolType.POOL_ANGEL,
+        ItemPoolType.POOL_TREASURE,
+        ItemPoolType.POOL_SECRET,
+        ItemPoolType.POOL_TREASURE,
+        ItemPoolType.POOL_GOLDEN_CHEST,
     }
     roomPool = itemPools[math.random(1,8)] -- simplest random selection method I could think of that would yield somewhat balanced item pool draws
 end
@@ -50,7 +52,7 @@ function itemsPlease(player)
             player = Isaac.GetPlayer(i-1)
             pType = player:GetPlayerType() 
             if pType == tLazAliveType or pType == tLazDeadType then cap = 2 else cap = 1 end
-            for num = 1,cap do
+            for num = 1, cap do
                 bonusItems:giveNewItem(player)
             end
         end
@@ -96,21 +98,38 @@ function bonusItems:initToybox()
 			toyboxEntity = entities[1]
 			if destroyed == true then
 				sprite = toyboxEntity:GetSprite()
-				sprite:Play("Destroyed",true)
+				sprite:Play("Destroyed", true)
 			end
 			return
 		end
+        -- for i = 1, #entities do
+        --     toyboxEntByType = Isaac.FindByType(toyBox, toyboxVar)
+        --     if entities[i].Type == toyboxEntByType then
+		-- 	    toyboxEntity = entities[i]
+        --         if destroyed == true then
+        --             sprite = toyboxEntity:GetSprite()
+        --             sprite:Play("Destroyed",true)
+        --         end
+        --         return
+        --     end
+        -- end
 
         if (toyboxEntity == nil) or (toyboxEntity:Exists() == false) then
-			if Game():IsGreedMode() ~= true then
-                if Game():GetLevel():GetStage() == 9 then
-                    toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(221), Vector(0,0), Isaac.GetPlayer(0));
-                else
-			        toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(116), Vector(0,0), Isaac.GetPlayer(0));
-                end
+			-- if Game():IsGreedMode() ~= true then
+            --     if Game():GetLevel():GetStage() == 9 then
+            --         toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(221), Vector(0,0), Isaac.GetPlayer(0));
+            --     else
+			--         toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(116), Vector(0,0), Isaac.GetPlayer(0));
+            --     end
+            -- else
+            --     toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(112), Vector(0,0), Isaac.GetPlayer(0));
+            -- end
+            if Game():IsGreedMode() ~= true then
+                toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(18), Vector(0,0), Isaac.GetPlayer(0));
             else
                 toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(112), Vector(0,0), Isaac.GetPlayer(0));
             end
+
             sprite = toyboxEntity:GetSprite()
 			sprite:Play("Idle",true)
 			destroyed = false
@@ -143,17 +162,17 @@ function bonusItems:updateToyboxState(entity)
 end
 ----------------------------------------------------------------------
 function boxDamage(p1, p2, p3, flags, p4) -- check done to generate pickups the first time the toybox is bombed
-    local entities = Isaac.GetRoomEntities()
-    for i = 1, #entities do
-        if (entities[i].Type == 4) then
+    local beeps = Isaac.GetRoomEntities()
+    for i = 1, #beeps do
+        if (beeps[i].Type == 4) then
             print("bomb!")
-            bomba = entities[i]
+            bomba = beeps[i]
             dist = toyboxEntity.Position:Distance(bomba.Position)
             print(dist)
             if dist <= 107 then
 	            if toyboxEntity ~= nil then
 		            if (flags & DamageFlag.DAMAGE_EXPLOSION) ~= 0 and destroyed == false then
-			            sprite:Play("Destroyed", true)
+			            -- sprite:Play("Destroyed", true)
                         Isaac.Spawn(1000, 15, 0, toyboxEntity.Position, Vector(0,0), player)
                         generatePickups()
                         destroyed = true
@@ -164,6 +183,8 @@ function boxDamage(p1, p2, p3, flags, p4) -- check done to generate pickups the 
 	end
     return false
 end
+
+bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, boxDamage, toyBox)
 ----------------------------------------------------------------------
 function itemSpawnCheck() -- check done to generate items the first time the chest is opened
     if toyboxEntity ~= nil then
@@ -188,9 +209,17 @@ function playOpenSound()
     end
 end
 ----------------------------------------------------------------------
+function onDMG(target,amount,flag,source,num)
+    if target.Type == box.Type then
+        print("toybox got Dmg")
+    end
+end
+
+bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, onDMG)
+----------------------------------------------------------------------
 
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, bonusItems.initToybox)
-bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, boxDamage, toyBox)
+-- bonusItems:AddCallback(ModCallbacks.MC_POST_BOMB_INIT, bombToBoxDist, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_NPC_UPDATE, bonusItems.updateToyboxState, toyBox)
 bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, itemSpawnCheck)
 bonusItems:AddCallback(ModCallbacks.MC_PRE_NPC_COLLISION, playOpenSound, toyBox)
