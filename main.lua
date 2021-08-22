@@ -9,8 +9,6 @@ local tLazDeadType = 38
 local toyboxEntity = nil
 local destroyed = false
 local itemsDropped = false
-local box = Isaac.FindByType(toyBox, toyboxVar)
-
 
 ----------------------------------------------------------------------
 -- Item generation handlers
@@ -102,30 +100,14 @@ function bonusItems:initToybox()
 			end
 			return
 		end
-        -- for i = 1, #entities do
-        --     toyboxEntByType = Isaac.FindByType(toyBox, toyboxVar)
-        --     if entities[i].Type == toyboxEntByType then
-		-- 	    toyboxEntity = entities[i]
-        --         if destroyed == true then
-        --             sprite = toyboxEntity:GetSprite()
-        --             sprite:Play("Destroyed",true)
-        --         end
-        --         return
-        --     end
-        -- end
 
         if (toyboxEntity == nil) or (toyboxEntity:Exists() == false) then
-			-- if Game():IsGreedMode() ~= true then
-            --     if Game():GetLevel():GetStage() == 9 then
-            --         toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(221), Vector(0,0), Isaac.GetPlayer(0));
-            --     else
-			--         toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(116), Vector(0,0), Isaac.GetPlayer(0));
-            --     end
-            -- else
-            --     toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(112), Vector(0,0), Isaac.GetPlayer(0));
-            -- end
-            if Game():IsGreedMode() ~= true then
-                toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(18), Vector(0,0), Isaac.GetPlayer(0));
+			if Game():IsGreedMode() ~= true then
+                if Game():GetLevel():GetStage() == 9 then
+                    toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(221), Vector(0,0), Isaac.GetPlayer(0));
+                else
+			        toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(116), Vector(0,0), Isaac.GetPlayer(0));
+                end
             else
                 toyboxEntity = Isaac.Spawn(toyBox, toyboxVar, 0, room:GetGridPosition(112), Vector(0,0), Isaac.GetPlayer(0));
             end
@@ -209,13 +191,28 @@ function playOpenSound()
     end
 end
 ----------------------------------------------------------------------
+-- function bombToBoxDist(bomb)
+--     local entities = Isaac.GetRoomEntities()
+-- 	for i = 1, #entities do
+--         if (entities[i].Type == 4) then
+--             print("bomb!")
+--             bomba = entities[i]
+--             dist = toyboxEntity.Position:Distance(bomba.Position)
+--             print(dist)
+--             if dist >= 107 then
+--                 print("too far!")
+--             end
+--         end
+--     end
+-- end
 function onDMG(target,amount,flag,source,num)
-    if target.Type == box.Type then
+    local box = Isaac.FindByType(toyBox, toyboxVar)
+    if source.Type == box then
         print("toybox got Dmg")
     end
 end
 
-bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, onDMG)
+bonusItems:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, onDMG, toyBox)
 ----------------------------------------------------------------------
 
 bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, bonusItems.initToybox)
@@ -230,4 +227,9 @@ bonusItems:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, resetLevelTracker)
     horsepoop I don't understand when it came to callback logic I used to give/spawn items, I decided to opt for a workaround instead
 
     pro tip:    don't generate items that generate pickups before the level loads or else the game will crash
+
+    ran into an issue where furniture entities sometimes inherit states of other furniture entities, making
+    cross-mod compatibility very difficult; I also unfortunately don't have the time to fix it
+    i.e. a bomb explosion near one furniture entity will trigger a 'destroyed' state of a furniture entity in a different
+    part of the room which should remain unaffected.
 ]]
